@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Word {
+  id              String         @id @default(cuid())
+  coverImageUrl   String?
+  coverImageWidth Int?
+  coverImageHeight Int?
+  words           WordTranslation[]
+  pronunciations  Pronunciation[]
+  frequencies     Frequency[]
+  categories      WordCategory[]
+  examples        Example[]
+  meanings        WordMeaning[]
+  inflections     Inflection[]
+    createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model WordTranslation {
+  id        String  @id @default(cuid())
+  wordText  String
+  lang      String  // 言語コード (例: "en", "ja")
+  wordId    String
+  word      Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+}
+
+model Pronunciation {
+  id        String  @id @default(cuid())
+  text      String
+  lang      String
+  wordId    String
+  word      Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+}
+
+model Frequency {
+  id        String  @id @default(cuid())
+  frequency Int
+  lang      String
+  wordId    String
+  word      Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+}
+
+model WordMeaning {
+  id      String @id @default(cuid())
+  meaning String  // ✅ `meaning` フィールドを追加
+  lang    String
+  wordId  String
+  word    Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+}
+
+model Inflection {
+  id      String @id @default(cuid())
+  form    String  // ✅ `form` フィールドを追加
+  lang    String
+  wordId  String
+  word    Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+}
+
+model Example {
+  id       String @id @default(cuid())
+  sentence String  // ✅ `sentence` フィールドを追加
+  lang     String
+  wordId   String
+  word     Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+    createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model WordCategory {
+  wordId     String
+  categoryId String
+  word       Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  @@id([wordId, categoryId])  // ✅ 複合主キーを設定
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String
+    createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  words WordCategory[]
+}
