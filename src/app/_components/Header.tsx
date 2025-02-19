@@ -42,7 +42,7 @@ const Header: React.FC = () => {
                 <Link href="/login">Login</Link>
               ))}
             {/* ▲ 追加 */}
-            <Link href="/about">About</Link>
+            <Link href="/admin">Add</Link>
           </div>
         </div>
       </div>
