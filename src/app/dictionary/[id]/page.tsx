@@ -2,25 +2,19 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { fetchMicroCMS } from "../../../../lib/fetchMicroCMS";
-import { transformMicroCMSData } from "../../../../lib/transformMicroCMSData";
-import { WordData, LanguageCode } from "@/app/_types/Words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
-const availableLanguages: LanguageCode[] = ["en", "ja", "de", "ru"];
+const availableLanguages = ["en", "ja", "de", "ru"];
 
 const WordDetailPage = () => {
   const { id } = useParams();
   const router = useRouter();
 
-  const [word, setWord] = useState<WordData | null>(null);
+  const [word, setWord] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [selectedLanguages, setSelectedLanguages] = useState<LanguageCode[]>([
-    "en",
-  ]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["en"]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,16 +25,15 @@ const WordDetailPage = () => {
 
         console.log(`Fetching data for ID: ${id}`);
 
-        const response = await fetchMicroCMS(`words/${id}`);
-        const transformedData = transformMicroCMSData({ contents: [response] });
-
-        console.log("Fetched Data:", transformedData);
-
-        if (!transformedData || transformedData.length === 0) {
-          throw new Error("データが見つかりませんでした");
+        const response = await fetch(`/api/admin/words/${id}`);
+        if (!response.ok) {
+          throw new Error(`データの取得に失敗しました (${response.status})`);
         }
 
-        setWord(transformedData[0]);
+        const data = await response.json();
+        console.log("Fetched Data:", data);
+
+        setWord(data);
       } catch (error) {
         setFetchError(
           error instanceof Error ? error.message : "不明なエラーが発生しました"
@@ -70,7 +63,7 @@ const WordDetailPage = () => {
     return <div className="text-red-500">単語データが見つかりません</div>;
   }
 
-  const toggleLanguage = (language: LanguageCode) => {
+  const toggleLanguage = (language: string) => {
     setSelectedLanguages((prev) =>
       prev.includes(language)
         ? prev.filter((l) => l !== language)
@@ -95,34 +88,44 @@ const WordDetailPage = () => {
         ))}
       </div>
 
-      <div className="mb-4 flex w-full justify-center"></div>
-
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {selectedLanguages.map((lang) => (
           <div key={lang} className="rounded-lg border p-4 shadow-md">
             <h2 className="text-xl font-semibold">
-              {word.words[lang] || "No Data"}
+              {word.words.find((w: any) => w.lang === lang)?.wordText ||
+                "No Data"}
             </h2>
             <p className="text-gray-700">
-              Pronunciation: {word.pronunciation[lang] || "No Data"}
+              発音:{" "}
+              {word.pronunciations.find((p: any) => p.lang === lang)?.text ||
+                "No Data"}
             </p>
             <p className="text-gray-700">
-              Frequency:{" "}
-              {word.frequency[lang] ? `${word.frequency[lang]}%` : "No Data"}
+              使用頻度:{" "}
+              {word.frequencies.find((f: any) => f.lang === lang)?.frequency ||
+                "No Data"}
+            </p>
+            <p className="text-gray-700">
+              意味:{" "}
+              {word.meanings.find((m: any) => m.lang === lang)?.meaning ||
+                "No Data"}
+            </p>
+            <p className="text-gray-700">
+              例文:{" "}
+              {word.examples.find((e: any) => e.lang === lang)?.sentence ||
+                "No Data"}
+            </p>
+            <p className="text-gray-700">
+              活用形:{" "}
+              {word.inflections.find((i: any) => i.lang === lang)?.form ||
+                "No Data"}
             </p>
             <p className="mt-2">
               <span className="font-bold">Categories:</span>{" "}
               {word.categories.length > 0
-                ? word.categories.join(", ")
+                ? word.categories.map((c: any) => c.category.name).join(", ")
                 : "No Categories"}
             </p>
-
-            {word.inflections[lang]?.length > 0 && (
-              <div>
-                <h3 className="mt-2 text-base font-semibold">Inflections:</h3>
-                <p>{word.inflections[lang].join(", ") || "No Variations"}</p>
-              </div>
-            )}
           </div>
         ))}
       </div>
