@@ -5,7 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const HomePage = () => {
-  const [words, setWords] = useState<{ id: string; wordText: string }[]>([]);
+  const [words, setWords] = useState<
+    { id: string; wordText: string; meaning: string }[]
+  >([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true); // ✅ ローディング状態を追加
 
@@ -21,6 +23,8 @@ const HomePage = () => {
             id: word.id,
             wordText:
               word.words.length > 0 ? word.words[0].wordText : "No Title",
+            meaning:
+              word.meanings.length > 0 ? word.meanings[0].meaning : "No Meanig",
           }))
         );
       } catch (error) {
@@ -49,16 +53,19 @@ const HomePage = () => {
     <main className="p-4">
       <h1 className="mb-4 text-2xl font-bold">Words</h1>
       <ul>
-        {words.map((word) => (
-          <li key={word.id} className="mb-2">
-            <Link
-              href={`/dictionary/${word.id}`}
-              className="text-blue-500 hover:underline"
-            >
-              {word.wordText}
-            </Link>
-          </li>
-        ))}
+        <div className="rounded-lg border p-4 shadow-md">
+          {words.map((word) => (
+            <li key={word.id} className="mb-2">
+              <Link
+                href={`/dictionary/${word.id}`}
+                className="text-blue-500 hover:underline"
+              >
+                {word.wordText}
+              </Link>
+              <p className="text-gray-700">Meaning: {word.meaning}</p>
+            </li>
+          ))}
+        </div>
       </ul>
     </main>
   );
