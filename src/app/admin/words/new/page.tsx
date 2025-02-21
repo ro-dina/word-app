@@ -72,7 +72,7 @@ const NewWordPage: React.FC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ トークンを追加
+          Authorization: token, // ✅ トークンを追加
         },
         body: JSON.stringify(formData),
       });
@@ -100,6 +100,10 @@ const NewWordPage: React.FC = () => {
 
     fetchWords();
   }, []);
+
+  useEffect(() => {
+    console.log("🚀 取得したトークン:", token);
+  }, [token]);
 
   return (
     <main className="p-4">

@@ -43,7 +43,18 @@ export const PUT = async (
   { params }: { params: { id: string } }
 ) => {
   try {
+    console.log("🔹 PUTリクエスト開始");
+    console.log("🔹 params.id:", params.id);
+
     const body = await req.json();
+    console.log("🔹 受け取ったデータ:", body);
+
+    if (!body) {
+      return NextResponse.json(
+        { error: "リクエストボディが空です" },
+        { status: 400 }
+      );
+    }
 
     const updatedWord = await prisma.word.update({
       where: { id: params.id },
@@ -51,16 +62,58 @@ export const PUT = async (
         coverImageUrl: body.coverImageUrl,
         coverImageWidth: body.coverImageWidth,
         coverImageHeight: body.coverImageHeight,
-        words: { deleteMany: {}, create: body.words },
-        pronunciations: { deleteMany: {}, create: body.pronunciations },
-        frequencies: { deleteMany: {}, create: body.frequencies },
-        meanings: { deleteMany: {}, create: body.meanings },
-        examples: { deleteMany: {}, create: body.examples },
-        inflections: { deleteMany: {}, create: body.inflections },
+
+        words: {
+          deleteMany: { id: { notIn: body.words.map((w: any) => w.id) } },
+          upsert: body.words.map((w: any) => ({
+            where: { id: w.id || "" },
+            update: { wordText: w.wordText, lang: w.lang },
+            create: { wordText: w.wordText, lang: w.lang },
+          })),
+        },
+
+        pronunciations: {
+          deleteMany: {
+            id: { notIn: body.pronunciations.map((p: any) => p.id) },
+          },
+          upsert: body.pronunciations.map((p: any) => ({
+            where: { id: p.id || "" },
+            update: { text: p.text, lang: p.lang },
+            create: { text: p.text, lang: p.lang },
+          })),
+        },
+
+        frequencies: {
+          deleteMany: { id: { notIn: body.frequencies.map((f: any) => f.id) } },
+          upsert: body.frequencies.map((f: any) => ({
+            where: { id: f.id || "" },
+            update: { frequency: f.frequency, lang: f.lang },
+            create: { frequency: f.frequency, lang: f.lang },
+          })),
+        },
+
+        meanings: {
+          deleteMany: { id: { notIn: body.meanings.map((m: any) => m.id) } },
+          upsert: body.meanings.map((m: any) => ({
+            where: { id: m.id || "" },
+            update: { meaning: m.meaning, lang: m.lang },
+            create: { meaning: m.meaning, lang: m.lang },
+          })),
+        },
+
+        inflections: {
+          deleteMany: { id: { notIn: body.inflections.map((i: any) => i.id) } },
+          upsert: body.inflections.map((i: any) => ({
+            where: { id: i.id || "" },
+            update: { form: i.form, lang: i.lang },
+            create: { form: i.form, lang: i.lang },
+          })),
+        },
+
         categories: {
           deleteMany: {},
-          create: body.categoryIds.map((categoryId: string) => ({
-            category: { connect: { id: categoryId } },
+          connect: (body.categoryIds ?? []).map((categoryId: string) => ({
+            id: categoryId,
           })),
         },
       },
@@ -75,11 +128,12 @@ export const PUT = async (
       },
     });
 
+    console.log("✅ 更新成功:", updatedWord);
     return NextResponse.json(updatedWord);
   } catch (error) {
     console.error("🚨 単語の更新エラー:", error);
     return NextResponse.json(
-      { error: "単語の更新に失敗しました" },
+      { error: "単語の更新に失敗しました", details: String(error) },
       { status: 500 }
     );
   }
