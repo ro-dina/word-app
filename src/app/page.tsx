@@ -53,19 +53,17 @@ const HomePage = () => {
     <main className="p-4">
       <h1 className="mb-4 text-2xl font-bold">Words</h1>
       <ul>
-        <div className="rounded-lg border p-4 shadow-md">
-          {words.map((word) => (
-            <li key={word.id} className="mb-2">
-              <Link
-                href={`/dictionary/${word.id}`}
-                className="text-blue-500 hover:underline"
-              >
-                {word.wordText}
-              </Link>
-              <p className="text-gray-700">Meaning: {word.meaning}</p>
-            </li>
-          ))}
-        </div>
+        {words.map((word) => (
+          <li key={word.id} className="mb-2 border p-4 rounded-md shadow">
+            <Link
+              href={`/dictionary/${word.id}`}
+              className="text-blue-500 hover:underline"
+            >
+              {word.wordText}
+            </Link>
+            <p className="text-gray-700">Meaning: {word.meaning}</p>
+          </li>
+        ))}
       </ul>
     </main>
   );

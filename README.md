@@ -1,3 +1,29 @@
+## 概要
+
+日本語、英語、ドイツ語、ロシア語の単語を確認できる辞書アプりです。
+
+## 使い方
+
+任意の単語をクリックすると単語の詳細を見ることができます。チェックボックスを使用して任意の言語の組み合わせで意味を見ることができます。
+
+## 技術スタック
+
+# フロントエンド
+
+- Next.js 14
+- React
+- TypeScript
+
+# バックエンド
+
+- Prisma
+- Supabase 認証用(単語を追加する管理者機能として使用)
+
+# 実装予定の機能
+
+- ユーザが例文を投稿できる機能
+- 共通箇所を最低でも日、英、独、露に対応
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
