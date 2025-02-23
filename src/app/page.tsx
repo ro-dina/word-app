@@ -54,7 +54,7 @@ const HomePage = () => {
       <h1 className="mb-4 text-2xl font-bold">Words</h1>
       <ul>
         {words.map((word) => (
-          <li key={word.id} className="mb-2 border p-4 rounded-md shadow">
+          <li key={word.id} className="mb-2 rounded-md border p-4 shadow">
             <Link
               href={`/dictionary/${word.id}`}
               className="text-blue-500 hover:underline"

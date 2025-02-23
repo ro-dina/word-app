@@ -1,6 +1,26 @@
 import prisma from "@/lib/prisma";
 import { NextResponse, NextRequest } from "next/server";
 
+export function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+
+  res.headers.set("Access-Control-Allow-Origin", "*");
+  res.headers.set(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: res.headers });
+  }
+
+  return res;
+}
+
 // 🔹 単語の詳細を取得
 export const GET = async (
   req: NextRequest,
@@ -65,11 +85,18 @@ export const PUT = async (
 
         words: {
           deleteMany: { id: { notIn: body.words.map((w: any) => w.id) } },
-          upsert: body.words.map((w: any) => ({
-            where: { id: w.id || "" },
-            update: { wordText: w.wordText, lang: w.lang },
-            create: { wordText: w.wordText, lang: w.lang },
-          })),
+          create: body.words
+            .filter((w: any) => !w.id) // ✅ IDがないものは create
+            .map((w: any) => ({
+              wordText: w.wordText,
+              lang: w.lang,
+            })),
+          updateMany: body.words
+            .filter((w: any) => w.id) // ✅ IDがあるものは updateMany
+            .map((w: any) => ({
+              where: { id: w.id },
+              data: { wordText: w.wordText, lang: w.lang },
+            })),
         },
 
         pronunciations: {

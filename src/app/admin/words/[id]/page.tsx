@@ -83,16 +83,19 @@ const EditWordPage: React.FC = () => {
   const handleUpdate = async () => {
     setSaving(true);
     try {
+      const token = localStorage.getItem("authToken"); // ✅ トークンを取得
+
       const res = await fetch(`/api/admin/words/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ 認証情報を追加
+        },
         body: JSON.stringify(wordData),
       });
 
       if (!res.ok) throw new Error("更新に失敗しました");
-
       alert("単語を更新しました");
-      router.push("/admin/words");
     } catch (err: any) {
       alert("更新エラー: " + err.message);
     } finally {
@@ -127,7 +130,7 @@ const EditWordPage: React.FC = () => {
           画像URL:
           <input
             type="text"
-            className="w-full p-2 border rounded"
+            className="w-full rounded border p-2"
             value={wordData.coverImageUrl}
             onChange={(e) => handleChange("coverImageUrl", e.target.value)}
           />
@@ -141,7 +144,7 @@ const EditWordPage: React.FC = () => {
               {w.lang.toUpperCase()}:
               <input
                 type="text"
-                className="ml-2 p-1 border rounded"
+                className="ml-2 rounded border p-1"
                 value={w.wordText}
                 onChange={(e) => handleWordChange(index, e.target.value)}
               />
@@ -157,7 +160,7 @@ const EditWordPage: React.FC = () => {
               {p.lang.toUpperCase()}:
               <input
                 type="text"
-                className="ml-2 p-1 border rounded"
+                className="ml-2 rounded border p-1"
                 value={p.text}
                 onChange={(e) =>
                   handlePronunciationChange(index, e.target.value)
@@ -175,7 +178,7 @@ const EditWordPage: React.FC = () => {
               {m.lang.toUpperCase()}:
               <input
                 type="text"
-                className="ml-2 p-1 border rounded"
+                className="ml-2 rounded border p-1"
                 value={m.meaning}
                 onChange={(e) => handleMeaningChange(index, e.target.value)}
               />
@@ -191,7 +194,7 @@ const EditWordPage: React.FC = () => {
               {f.lang.toUpperCase()}:
               <input
                 type="number"
-                className="ml-2 p-1 border rounded"
+                className="ml-2 rounded border p-1"
                 value={f.frequency}
                 onChange={(e) =>
                   handleFrequencyChange(index, Number(e.target.value))
@@ -209,7 +212,7 @@ const EditWordPage: React.FC = () => {
               {i.lang.toUpperCase()}:
               <input
                 type="text"
-                className="ml-2 p-1 border rounded"
+                className="ml-2 rounded border p-1"
                 value={i.form}
                 onChange={(e) => handleInflectionChange(index, e.target.value)}
               />
@@ -226,7 +229,7 @@ const EditWordPage: React.FC = () => {
         </button>
 
         <button
-          className="mt-4 ml-2 rounded bg-red-500 px-4 py-2 text-white"
+          className="ml-2 mt-4 rounded bg-red-500 px-4 py-2 text-white"
           onClick={handleDelete}
         >
           削除
